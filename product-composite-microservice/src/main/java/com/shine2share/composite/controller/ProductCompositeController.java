@@ -14,12 +14,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @Tag(name = "ProductCompositeController", description =
         "REST API for composite product information.")
 public class ProductCompositeController {
+    private static final Logger LOG = LoggerFactory.getLogger(ProductCompositeController.class);
     private final ServiceUtil serviceUtil;
     private final ProductCompositeService productCompositeService;
     public ProductCompositeController(
@@ -51,14 +56,15 @@ public class ProductCompositeController {
             @ApiResponse(responseCode = "422", description =
                     "${api.responseCodes.unprocessableEntity.description}")
     })
-    public ProductAggregate getProduct(@PathVariable int productId) {
-        Product product = productCompositeService.getProduct(productId);
-        if (product == null) {
-            throw new NotFoundException("No product found for productId: " + productId);
-        }
-        List<Recommendation> recommendations = productCompositeService.getRecommendations(productId);
-        List<Review> reviews = productCompositeService.getReviews(productId);
-        return createProductAggregate(product, recommendations, reviews, serviceUtil.getServiceAddress());
+    public Mono<ProductAggregate> getProduct(@PathVariable int productId) {
+        LOG.info("Will get composite product info for product.id={}", productId);
+        return Mono.zip(
+                values -> createProductAggregate((Product) values[0], (List<Recommendation>) values[1], (List<Review>) values[2], serviceUtil.getServiceAddress()),
+                this.productCompositeService.getProduct(productId),
+                this.productCompositeService.getRecommendations(productId).collectList(),
+                this.productCompositeService.getReviews(productId).collectList()
+        ).doOnError(ex -> LOG.warn("getCompositeProduct failed: {}", ex.toString()))
+                .log(LOG.getName(), Level.FINE);
     }
 
     private ProductAggregate createProductAggregate(

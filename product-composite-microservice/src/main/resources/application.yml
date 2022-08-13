@@ -15,8 +15,8 @@ api:
       url: URL TO CONTACT
       email: contact@mail.com
 springdoc:
-  swagger-ui.path: /openapi/swagger-ui.html
-  api-docs.path: /openapi/v3/api-docs
+  swagger-ui.path: /springdoc/swagger-ui.html
+  api-docs.path: /springdoc/v3/api-docs
   packagesToScan: com.shine2share.composite
   pathsToMatch: /**
 app:

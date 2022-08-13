@@ -1,46 +1,29 @@
 package com.shine2share.recommendation.controller;
 
-import com.shine2share.core.exception.InvalidInputException;
 import com.shine2share.core.recommendation.Recommendation;
-import com.shine2share.core.utils.ServiceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.shine2share.recommendation.service.RecommendationService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/recommendation")
 public class RecommendationController {
-    private static final Logger LOG = LoggerFactory.getLogger(RecommendationController.class);
-    private final ServiceUtil serviceUtil;
-    public RecommendationController(ServiceUtil serviceUtil) {
-        this.serviceUtil = serviceUtil;
+    private final RecommendationService recommendationService;
+    public RecommendationController(RecommendationService recommendationService) {
+        this.recommendationService = recommendationService;
     }
     @GetMapping("/{productId}")
-    public List<Recommendation> getRecommendations(@PathVariable int productId) {
-        if (productId < 1) {
-            throw new InvalidInputException("Invalid productId: " + productId);
-        }
-        if (productId == 113) {
-            LOG.debug("No recommendations found for productId: {}", productId);
-            return new ArrayList<>();
-        }
-        List<Recommendation> list = new ArrayList<>();
-        list.add(new Recommendation(productId, 1, "Author 1", 1, "Content 1", serviceUtil.getServiceAddress()));
-        list.add(new Recommendation(productId, 2, "Author 2", 2, "Content 2", serviceUtil.getServiceAddress()));
-        list.add(new Recommendation(productId, 3, "Author 3", 3, "Content 3", serviceUtil.getServiceAddress()));
-        LOG.debug("/recommendation response size: {}", list.size());
-        return list;
+    public Flux<Recommendation> getRecommendations(@PathVariable int productId) {
+        return this.recommendationService.getRecommendations(productId);
     }
 
     @PostMapping("/recommendation")
-    Recommendation createRecommendations(@RequestBody Recommendation body) {
-        return null;
+    public Mono<Recommendation> createRecommendations(@RequestBody Recommendation body) {
+        return this.recommendationService.createRecommendations(body);
     }
     @DeleteMapping("/recommendation")
-    void deleteRecommendations(@RequestParam(value = "productId") int productId) {
-
+    public Mono<Void> deleteRecommendations(@RequestParam(value = "productId") int productId) {
+        return this.recommendationService.deleteRecommendations(productId);
     }
 }

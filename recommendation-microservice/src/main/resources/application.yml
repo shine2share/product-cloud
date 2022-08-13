@@ -10,6 +10,7 @@ logging:
   level:
     root: INFO
     com.shine2share.recommendation: DEBUG
+    org.springframeword.data.mongodb.core.MongoTemplate: DEBUG
 ---
 spring.config.activate.on-profile: docker
 server:
