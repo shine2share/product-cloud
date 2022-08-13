@@ -6,6 +6,7 @@ import com.shine2share.core.product.Product;
 import com.shine2share.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ public class MessageProcessorConfig {
     public MessageProcessorConfig(ProductService productService) {
         this.productService = productService;
     }
-
+    @Bean
     public Consumer<Event<Integer, Product>> messageProcessor() {
         return event -> {
             LOG.info("Pprocess message created at {}...", event.getEventCreatedAt());

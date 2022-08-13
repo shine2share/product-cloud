@@ -2,10 +2,22 @@ server:
   port: 7002
   error:
     include-message: always
+
 spring.data.mongodb:
   host: localhost
   port: 27017
   database: recommendation-db
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
 logging:
   level:
     root: INFO
@@ -13,6 +25,12 @@ logging:
     org.springframeword.data.mongodb.core.MongoTemplate: DEBUG
 ---
 spring.config.activate.on-profile: docker
+
 server:
   port: 9001
+
 spring.data.mongodb.host: mongodb
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka
